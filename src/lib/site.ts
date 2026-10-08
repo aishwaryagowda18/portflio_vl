@@ -1,8 +1,20 @@
 import { profile } from "@/data/profile";
 import { metrics } from "@/lib/metrics";
 
-/** Set NEXT_PUBLIC_SITE_URL to the production domain before deploying. */
-export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+/**
+ * Public site address used for canonical URLs, the sitemap, Open Graph and Schema.org data.
+ * Order: NEXT_PUBLIC_SITE_URL if set; otherwise the production domain Vercel provides at build
+ * time (VERCEL_PROJECT_PRODUCTION_URL — the custom domain once one is added); otherwise localhost.
+ */
+function resolveSiteUrl() {
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (explicit) return explicit;
+  const vercelProduction = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (vercelProduction) return `https://${vercelProduction}`;
+  return "http://localhost:3000";
+}
+
+export const siteUrl = resolveSiteUrl().replace(/\/$/, "");
 
 export const siteName = `${profile.fullName} — Physics Research`;
 
